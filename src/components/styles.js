@@ -1,28 +1,36 @@
+import { Calculate } from "@mui/icons-material";
 import { borderRadius, color, height, padding } from "@mui/system";
 
 export const styles = () => ({
   root: {
     textAlign: "center",
     display: "flex",
-    flexDirection: "column",
     minHeight: "100vh",
     color: "#000133",
   },
   appBar: {
-    background: "#fff",
+    background: "#13728F",
     color: "#012241",
-    boxShadow: "rgba(17, 17, 26, 0.1) 0px 1px 0px;",
+    display:"flex",
+    justifyContent:'space-between',
+    padding:'10px 15px'
+
+    
+  },
+  logo:{
+    width:'50px',
+    height:"50px",
+    borderRadius:"20px",
+  },
+  logoImage:{
+    width:'100%',
   },
   icon: {
     padding: "10px",
+    color:"#CCF5FE",
+    width:"50px",
   },
-  title: {
-    margin: "auto",
-  },
-  userName: {
-    marginRight: "10px",
-    marginLeft: "100px",
-  },
+
   profilePic: {
     marginRight: "90px",
   },
@@ -30,13 +38,19 @@ export const styles = () => ({
     display: "flex",
     flex: 1,
     background: "red",
-    marginTop: "50px",
+    minHeight:'100vh',
+
   },
   drawer: {
-    background: "#012241",
-    padding: "30px 0px 0px 0px",
+    background: "#13728F",
+    padding: "10px 0px 0px 0px",
     position: "static",
     transition: "width .5s",
+    minHeight:'100vh'
+  },
+
+  listItem:{
+    background:"#fff"
   },
   ClientDrawer: {
     background: "#012241",
@@ -50,13 +64,18 @@ export const styles = () => ({
     width: "350px",
   },
   opened: {
-    width: "240px",
+    width: "200px",
   },
   main: {
     flex: 1,
-    background: "#f7f5f5",
-    color: "black",
+    width:'40%'
   },
+  content:{
+    overflow:'scroll'
+  },
+  // mainClosed:{
+  //   background: "#f7f5f5",
+  // },
   footer: {
     background: "#FFF",
     height: "50px",
@@ -66,15 +85,17 @@ export const styles = () => ({
     color: "#FFF",
   },
   sideBarIcon: {
-    color: "#FFF",
+    color: "#CCF5FE",
   },
   sideBarItem: {
     color: "#FFF",
   },
   sideBarLink: {
     textDecoration: "none",
-    color: "#FFF",
+    color: "#CCF5FE",
     fontSize: "16px",
+    textTransform:'uppercase',
+    fontWeight:700
   },
   clientSideBar: {
     padding: "0px 0px 0px 60px",
@@ -126,27 +147,27 @@ export const styles = () => ({
   },
   logout: {
     width: "100px",
-    border: "1px solid #3e3e3e",
+    border: "none",
     outline: "none",
-    padding: "5px",
-    borderRadius: "3px",
-    background: "#012241",
-    color: "#FFFFFF",
+    borderRadius: "10px",
+    color: "#CCF5FE",
     cursor: "pointer",
+    height:"50px",
+    background:'none'
+
+
   },
   count:{
-    background:"#3e3e3e",
+    background:"#E4A77A",
     border: "1px solid #fff",
     borderRadius:"50%",
-    width:"15px",
-    height:"15px",
+    width:"10px",
+    height:"10px",
     position:"relative",
     color:"#fff",
-    padding:"5px",
-    fontSize:"13px",
     fontWeight:700,
     top:-6,
-    left:-16
+    left:-12
   },
   close:{
     color:"#012241",

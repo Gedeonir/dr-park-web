@@ -37,7 +37,7 @@ export const MainListItems = () => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [assignment, setAssignment] = useState(false);
-  // const Role = JSON.parse(localStorage.getItem("user"))?.data?.user?.roleName;
+
 
   const handleClick = () => {
     setOpen(!open);
@@ -50,11 +50,11 @@ export const MainListItems = () => {
   return (
     <div>
       <NavLink
-        to="/dashboard"
+        to="/home"
         className={classes.sideBarLink}
         style={({ isActive }) => (isActive ? undefined : activeStyle)}
       >
-        <ListItem button>
+        <ListItem>
           <ListItemIcon className={classes.sideBarIcon}>
             <DashboardIcon />
           </ListItemIcon>
