@@ -30,6 +30,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
+import { useParams } from "react-router";
+import logo from "../assets/images/logo.png";
+import profile from "../assets/images/profile.jpeg";
 
 const socketUrl = process.env.SOCKET_URL
 
@@ -41,19 +44,26 @@ const useStyles = makeStyles(styles);
 
 const notify = (toastMsg) => toast(toastMsg);
 
-const DashboardLayout = ({ children }) => {
+function getToken() {
+  const tokenString = sessionStorage.getItem('token');
+  const userToken = JSON.parse(tokenString);
+  return userToken
+}
+
+const DashboardLayout = ({ children}) => {
+  const token = getToken();
   const dispatch = useDispatch()
   const classes = useStyles();
   // const Notifications = useSelector(state => state.NotificationReducer.notifications)
   // const Notification = useSelector(state => state.getOneNotificationReducer.notification)
   const navigate = useNavigate();
   const [isOpened, setIsOpened] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user"));
   const [loading,setLoading]= React.useState(false)
   const [open, setOpen] = React.useState(false);
   const [Count, setCount] = React.useState(null);
    
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [anchorElProfile, setAnchorElProfile] = React.useState(null);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -61,6 +71,14 @@ const DashboardLayout = ({ children }) => {
 
   const handleCloseNavMenu = (event) => {
     setAnchorElNav(null);
+  };
+
+  const handleOpenProfileMenu = (event) => {
+    setAnchorElProfile(event.currentTarget);
+  };
+
+  const handleCloseProfileMenu = (event) => {
+    setAnchorElProfile(null);
   };
 
 
@@ -121,11 +139,26 @@ const DashboardLayout = ({ children }) => {
   //   });
   // }
 
-  // React.useEffect(() => {
-  //   if (user === null) {
-  //     navigate("/");
-  //   }
-  // }, [user])
+  const parseToken=(jwtToken)=>{
+    try {
+      return JSON.parse(atob(jwtToken.split('.')[1]));
+    } catch (error) {
+      return null
+    }
+  }
+  React.useEffect(() => {
+    if (!token) {
+      navigate("/user-account/signin");
+      console.log("You must sign in first!")
+    }else{
+      const decodedJwt = parseToken(token);
+      if (decodedJwt.exp * 1000 < Date.now()) {
+        sessionStorage.clear();
+        navigate("/user-account/signin");
+        console.log("Your session expired!");
+      }
+    }
+  }, [token])
 
   // useEffect(() => {
   //   handleNotificationAlert()
@@ -135,140 +168,47 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <div className={classes.root}>
-    <ToastContainer />
-      <AppBar className={classes.appBar}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            onClick={() => setIsOpened(!isOpened)}
-            className={classes.icon}
-          >
-            {isOpened ? <ChevronLeftIcon /> : <MenuIcon />}
-          </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            Phantom
-          </Typography>
-          {/* <Typography variant="h6" className={classes.userName}>
-            {user?.data?.user?.name}
-          </Typography> */}
-          {/* {user?.data?.user?.profilePicture.length !== 0 ? (
-            <Avatar
-              className={classes.profilePic}
-              alt="profile"
-              src={user?.data?.user?.profilePicture[user?.data?.user?.profilePicture?.length-1]}
-              sx={{ width: 40, height: 40, bgcolor: "#012241" }}
-            />
-          ) : (
-            <Avatar
-              className={classes.profilePic}
-              alt="profile"
-              sx={{ width: 40, height: 40, bgcolor: "#012241" }}
-            >
-              {user?.data?.user?.name.charAt(0).toUpperCase()}
-            </Avatar>
-          )} */}
-          {/* <Box
-            sx={{
-              color: "secondary",
-              mr: "12px",
-              display: "block",
-              width:"100px"
+      {token?(
+        <Drawer
+        variant="permanent"
+        classes={{
+          paper: clsx(classes.drawer, {
+            [classes.closed]: !isOpened,
+            [classes.opened]: isOpened,
+          }),
+        }}
+      >
+        <Box  className={classes.logo}>
+          <img src={logo} alt="logo" className={classes.logoImage}/>
+        </Box>
+        <List>
+          <MainListItems />
+        </List>
+      </Drawer>
+      ):(<></>)}
+    {/* <ToastContainer />
+      <div className={classes.container}>
+        {params?.token?(
+            <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawer, {
+                [classes.closed]: !isOpened,
+                [classes.opened]: isOpened,
+              }),
             }}
           >
             <IconButton
-              size="medium"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
+            onClick={() => setIsOpened(!isOpened)}
+            className={classes.icon}
             >
-              <NotificationsIcon sx={{fontSize:30}}/>
-              {Count >0 &&
-                <div className={classes.count}>{Count}</div>
-              }
+              {isOpened ? <ChevronLeftIcon /> : <MenuIcon />}
             </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display:"block",
-              }}
-            >
-              <div className={classes.Notification}>
-              All notifications ({Notifications.length}) 
-              <Divider />
-              </div>
-             {loading ? <Skeleton/> : Notifications.map((notification) => {
-                return (
-                  <div key={notification.uuid}>
-                    <div className={classes.actions}>
-                      <button className={classes.close} onClick={() => handleDeleteNotification(notification.uuid)}><CloseIcon sx={{ fontSize:14}}/></button>
-                    </div>
-                    {notification.isRead ? (
-                    <MenuItem
-                    onClick={() => handleRead(notification.uuid)} 
-                    sx={{display:"block", textDecoration: "none",p:2 }} 
-                    component={Link}
-                    >
-                      <Typography variant="h6">
-                      {notification.title}
-                      </Typography>
-                      <Typography>
-                      {notification.content}
-                      </Typography>
-                      </MenuItem>
-                    ) : (
-                    <MenuItem
-                    onClick={() => handleRead(notification.uuid)} 
-                    sx={{display:"block", background:"#eeeee4", textDecoration: "none",p:2 }} 
-                    component={Link}
-                    >
-                      <Typography variant="h6">
-                      {notification.title}
-                      </Typography>
-                      <Typography>
-                      {notification.content}
-                      </Typography>
-                      </MenuItem>
-                    )}
-                    <Divider />
-                  </div>
-                )
-              })}
-            </Menu>
-          </Box> */}
-          <button className={classes.logout} onClick={handleLogout}>
-            Logout
-          </button>
-        </Toolbar>
-      </AppBar>
-      <div className={classes.container}>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawer, {
-              [classes.closed]: !isOpened,
-              [classes.opened]: isOpened,
-            }),
-          }}
-        >
-          <Divider />
-          <List>
-            <MainListItems />
-          </List>
-        </Drawer>
+            <List>
+              <MainListItems />
+            </List>
+          </Drawer>
+        ):(<></>)}
 
         {/* <Dialog
               open={open}
@@ -298,8 +238,145 @@ const DashboardLayout = ({ children }) => {
             </DialogContent>
           </Dialog> */}
 
-        <main className={classes.main}>{children}</main>
-      </div>
+        <main className={classes.main}>
+          <Box className={classes.appBar}>
+              <IconButton
+              onClick={() => setIsOpened(!isOpened)}
+              className={classes.icon}
+              >
+                {isOpened ? <ChevronLeftIcon /> : <MenuIcon />}
+              </IconButton>
+              <Box sx={{display:'flex',justifyContent:'end', width:'100%'}}>
+              {token?(
+                <><Box
+                sx={{
+                  color: "#fff",
+                  display: "block",
+                  width: 40,
+                  height: 40
+                }}
+              >
+                <Box sx={{ padding: 1, display: 'flex' }} onClick={handleOpenProfileMenu}>
+                  <Avatar
+                    className={classes.profilePic}
+                    alt="profile"
+                  >
+                    <img src={profile} alt="logo" className={classes.logoImage} />
+                  </Avatar>
+                </Box>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorElProfile}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                  }}
+                  open={Boolean(anchorElProfile)}
+                  onClose={handleCloseProfileMenu}
+                  sx={{
+                    display: "block",
+                  }}
+                >
+                  <div className={classes.Notification}>
+                    User Data
+                    <Divider />
+                  </div>
+                  <div>
+                    <div className={classes.actions}>
+                      <button className={classes.close}><CloseIcon sx={{ fontSize: 14 }} /></button>
+                    </div>
+                    <MenuItem
+                      sx={{ display: "block", textDecoration: "none", p: 2 }}
+                      component={Link}
+                    >
+                      <Typography variant="h6">
+                        notification.title
+                      </Typography>
+                      <Typography>
+                        notification.content
+                      </Typography>
+                    </MenuItem>
+                    <Divider />
+                  </div>
+                </Menu>
+              </Box><Box
+                sx={{
+                  color: "#fff",
+                  display: "block",
+                  width: 40,
+                  height: 40
+                }}
+              >
+                  <IconButton
+                    size="medium"
+                    aria-label="notifications"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleOpenNavMenu}
+                    color="inherit"
+                  >
+                    <NotificationsIcon sx={{ fontSize: 26, color: '#CCF5FE' }} />
+                    <div className={classes.count}></div>
+                  </IconButton>
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorElNav}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "left",
+                    }}
+                    open={Boolean(anchorElNav)}
+                    onClose={handleCloseNavMenu}
+                    sx={{
+                      display: "block",
+                    }}
+                  >
+                    <div>
+                      <div className={classes.actions}>
+                        <button className={classes.close}><CloseIcon sx={{ fontSize: 14 }} /></button>
+                      </div>
+                      <div className={classes.Notification}>
+                        Notifications
+                        <Divider />
+                      </div>
+                      <MenuItem
+                        sx={{ display: "block", textDecoration: "none", p: 2 }}
+                        component={Link}
+                      >
+                        <Typography variant="h6">
+                          notification.title
+                        </Typography>
+                        <Typography>
+                          notification.content
+                        </Typography>
+                      </MenuItem>
+                      <Divider />
+                    </div>
+                  </Menu>
+                </Box></>
+                ):(
+                  <button onClick={() => navigate("/user-account/signin")} className={classes.logout}>
+                    Login
+                  </button>
+                )}            
+              </Box>
+          </Box>
+          <Box className="content">
+          {children}
+          </Box>
+          
+        </main>
+      {/* </div> */}
     </div>
   );
 };

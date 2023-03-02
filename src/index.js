@@ -8,8 +8,8 @@ import './index.css';
 
 const root = ReactDOM.createRoot(document.getElementById("app")).render(
   <Provider store={store}>
-    <React.StrictMode>
+    {/* <React.StrictMode> */}
       <App />
-    </React.StrictMode>
+    {/* </React.StrictMode> */}
   </Provider>
 );
